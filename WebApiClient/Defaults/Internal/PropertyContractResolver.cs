@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using System;
 using System.Reflection;
 using WebApiClient.DataAnnotations;
 
@@ -34,28 +33,6 @@ namespace WebApiClient.Defaults
             this.formatScope = scope;
         }
 
-        /// <summary>
-        /// 类型属性的的CamelCase
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
-        protected override string ResolvePropertyName(string propertyName)
-        {
-            var name = base.ResolvePropertyName(propertyName);
-            return this.useCamelCase ? FormatOptions.CamelCase(name) : name;
-        }
-
-        /// <summary>
-        /// 字典Key的CamelCase
-        /// </summary>
-        /// <param name="dictionaryKey"></param>
-        /// <returns></returns>
-        protected override string ResolveDictionaryKey(string dictionaryKey)
-        {
-            var name = base.ResolveDictionaryKey(dictionaryKey);
-            return this.useCamelCase ? FormatOptions.CamelCase(name) : name;
-        }
-
         /// <summary>        
         /// 创建属性
         /// </summary>
@@ -66,9 +43,14 @@ namespace WebApiClient.Defaults
         {
             var property = base.CreateProperty(member, memberSerialization);
             var descriptor = new PropertyDescriptor(this.formatScope, member);
-
+            
             property.PropertyName = descriptor.AliasName;
             property.Ignored = descriptor.IgnoreSerialized;
+
+            if (this.useCamelCase == true)
+            {
+                property.PropertyName = FormatOptions.CamelCase(property.PropertyName);
+            }
 
             if (property.Converter == null && descriptor.DateTimeFormat != null)
             {
@@ -81,6 +63,7 @@ namespace WebApiClient.Defaults
             }
             return property;
         }
+
 
         /// <summary>
         /// 表示属性的描述

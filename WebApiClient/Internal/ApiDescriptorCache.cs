@@ -120,13 +120,13 @@ namespace WebApiClient
                 returnAttribute = new AutoReturnAttribute();
             }
 
-            var dataType = method.ReturnType.GetGenericArguments().FirstOrDefault();
+            var dataType = method.ReturnType.GetGenericArguments().FirstOrDefault() ?? typeof(object);
             var descriptor = new ApiReturnDescriptor
             {
                 Attribute = returnAttribute,
                 ReturnType = method.ReturnType,
                 DataType = dataType,
-                IsITaskDefinition = method.ReturnType.GetGenericTypeDefinition() == typeof(ITask<>),
+                IsITaskDefinition = method.ReturnType.IsGenericParameter && method.ReturnType.GetGenericTypeDefinition() == typeof(ITask<>),
                 ITaskCtor = ApiTask.GetITaskConstructor(dataType),
             };
             return descriptor;

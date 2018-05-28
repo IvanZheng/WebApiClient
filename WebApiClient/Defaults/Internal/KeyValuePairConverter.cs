@@ -16,21 +16,6 @@ namespace WebApiClient.Defaults
         private static readonly Type keyValuePairType = typeof(KeyValuePair<,>);
 
         /// <summary>
-        /// 是否camel命名
-        /// </summary>
-        private readonly bool useCamelCase;
-
-        /// <summary>
-        /// KeyValuePair转换器
-        /// </summary>
-        /// <param name="camelCase">是否使用CamelCase</param>
-
-        public KeyValuePairConverter(bool camelCase)
-        {
-            this.useCamelCase = camelCase;
-        }
-
-        /// <summary>
         /// 返回是否支持转换目标类型
         /// </summary>
         /// <param name="objectType">目标类型</param>
@@ -63,15 +48,10 @@ namespace WebApiClient.Defaults
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             var reader = KeyValuePairReader.GetReader(value.GetType());
-            var key = reader.GetKey(value).ToString();
+            var key = reader.GetKey(value);
             var val = reader.GetValue(value);
 
-            if (this.useCamelCase == true)
-            {
-                key = FormatOptions.CamelCase(key);
-            }
-
-            writer.WritePropertyName(key);
+            writer.WritePropertyName(key.ToString());
             writer.WriteValue(val);
         }
 

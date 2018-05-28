@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -32,6 +33,10 @@ namespace WebApiClient.Attributes
         /// <returns></returns>
         protected override async Task<object> GetTaskResult(ApiActionContext context)
         {
+            if (context.ResponseMessage.StatusCode == HttpStatusCode.NoContent)
+            {
+                return null;
+            }
             var response = context.ResponseMessage;
             var dataType = context.ApiActionDescriptor.Return.DataType;
 
@@ -40,32 +45,31 @@ namespace WebApiClient.Attributes
                 return response;
             }
 
-            if (dataType == typeof(string))
-            {
-                return await response.Content.ReadAsStringAsync();
-            }
-
-            if (dataType == typeof(byte[]))
-            {
-                return await response.Content.ReadAsByteArrayAsync();
-            }
-
-            if (dataType == typeof(Stream))
-            {
-                return await response.Content.ReadAsStreamAsync();
-            }
-
             var contentType = new ContentType(response.Content.Headers.ContentType);
-            if (contentType.IsApplicationJson() == true)
+            if (contentType.IsApplicationJson())
             {
                 return await jsonReturn.GetTaskResult(context);
             }
-            else if (contentType.IsApplicationXml() == true)
+            else if (contentType.IsApplicationXml())
             {
                 return await xmlReturn.GetTaskResult(context);
             }
-
-            throw new ApiReturnNotSupportedExteption(response, dataType);
+            else if (dataType == typeof(string))
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
+            else if(dataType == typeof(byte[]))
+            {
+                return await response.Content.ReadAsByteArrayAsync();
+            }
+            else if(dataType == typeof(Stream))
+            {
+                return await response.Content.ReadAsStreamAsync();
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>

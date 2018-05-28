@@ -85,10 +85,10 @@ namespace WebApiClient
                 genericType = genericType.GetGenericTypeDefinition();
             }
 
-            var isTaskType = genericType == typeof(Task<>) || genericType == typeof(ITask<>);
+            var isTaskType = genericType == typeof(Task) || genericType == typeof(Task<>) || genericType == typeof(ITask<>);
             if (isTaskType == false)
             {
-                var message = $"返回类型必须为Task<>或ITask<>：{method}";
+                var message = $"返回类型必须为Task, Task<>或ITask<>：{method}";
                 throw new NotSupportedException(message);
             }
 
